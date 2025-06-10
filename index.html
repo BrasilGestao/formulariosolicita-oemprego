@@ -390,12 +390,27 @@
                     <textarea id="quem_sou_eu" name="quem_sou_eu"></textarea>
                 </label>
 
-                <div class="campo" style="text-align: center;">
-                    <label for="signatureCanvas">Assinatura do Candidato:</label><br>
-                    <canvas id="signatureCanvas" width="400" height="150" style="border:1px solid #ccc; border-radius: 8px;"></canvas><br>
-                    <button type="button" onclick="limparAssinatura()">Limpar</button>
-                </div>
-                <input type="hidden" id="assinaturaBase64" name="assinatura"/>
+                <div class="form-group">
+    <label for="signatureCanvas">Assinatura do Candidato:</label>
+    <div id="signatureContainer">
+        <canvas id="signatureCanvas"></canvas>
+        <button type="button" class="btn btn-primary" onclick="limparAssinatura()">Limpar Assinatura</button>
+        <button type="button" class="btn btn-secondary" id="openSignatureModal">Assinar Aqui</button>
+        <input type="hidden" id="assinaturaBase64" name="assinatura">
+    </div>
+</div>
+
+<div id="signatureModal" class="signature-modal">
+    <div class="signature-modal-content">
+        <h2>Assine Aqui</h2>
+        <canvas id="modalSignatureCanvas"></canvas>
+        <div class="modal-buttons">
+            <button type="button" class="btn btn-primary" id="saveModalSignature">Salvar Assinatura</button>
+            <button type="button" class="btn btn-danger" id="clearModalSignature">Limpar</button>
+            <button type="button" class="btn btn-secondary" id="closeSignatureModal">Fechar</button>
+        </div>
+    </div>
+</div>
             </section>
 
             <div style="text-align: center; margin-top: 20px;">

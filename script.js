@@ -2,43 +2,63 @@
 const SIGNATURE_CANVAS_WIDTH = 800;  // Largura para alta resolução no PDF
 const SIGNATURE_CANVAS_HEIGHT = 300; // Altura para alta resolução no PDF
 
-// Variáveis para o canvas da assinatura e seu contexto 2D
+// Variáveis para o canvas principal (visível no formulário)
 const canvas = document.getElementById('signatureCanvas');
 const ctx = canvas.getContext('2d');
 
-// Define a resolução interna do canvas para captura, mas o estilo limita o tamanho na tela.
-// Isso é crucial para que a imagem da assinatura não fique pixelada no PDF final.
-canvas.width = SIGNATURE_CANVAS_WIDTH;
-canvas.height = SIGNATURE_CANVAS_HEIGHT;
+// Variáveis para o canvas do modal (maior, para assinatura)
+const modalCanvas = document.getElementById('modalSignatureCanvas');
+const modalCtx = modalCanvas.getContext('2d');
+
+// Elementos do modal
+const signatureModal = document.getElementById('signatureModal');
+const openSignatureModalBtn = document.getElementById('openSignatureModal');
+const closeSignatureModalBtn = document.getElementById('closeSignatureModal');
+const saveModalSignatureBtn = document.getElementById('saveModalSignature');
+const clearModalSignatureBtn = document.getElementById('clearModalSignature');
 
 let drawing = false;
+let currentCtx = null; // Variável para saber qual contexto está ativo (principal ou modal)
 
-// Configurações do pincel para o desenho da assinatura
-ctx.lineWidth = 4; // Espessura da linha
-ctx.lineCap = 'round'; // Pontas arredondadas
-ctx.strokeStyle = '#000'; // Cor preta (preto sólido para a assinatura)
+// Define a resolução interna dos canvas para captura.
+canvas.width = SIGNATURE_CANVAS_WIDTH;
+canvas.height = SIGNATURE_CANVAS_HEIGHT;
+modalCanvas.width = SIGNATURE_CANVAS_WIDTH; // Ambos usam a mesma resolução interna para qualidade
+modalCanvas.height = SIGNATURE_CANVAS_HEIGHT;
 
-// Event Listeners para desenhar no canvas
-// Eventos de Mouse (para desktop)
-canvas.addEventListener('mousedown', startDrawing);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseout', stopDrawing); // Para de desenhar se o mouse sair do canvas
+// Configurações do pincel (aplicar a ambos os contextos)
+const setupCanvasContext = (context) => {
+    context.lineWidth = 4;
+    context.lineCap = 'round';
+    context.strokeStyle = '#000';
+};
 
-// Eventos de Toque (para mobile)
-canvas.addEventListener('touchstart', startDrawing);
-canvas.addEventListener('touchend', stopDrawing);
-canvas.addEventListener('touchmove', draw);
-canvas.addEventListener('touchcancel', stopDrawing); // Para de desenhar se o toque for cancelado
+setupCanvasContext(ctx);
+setupCanvasContext(modalCtx);
 
-function getCoordinates(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+// Event Listeners para ambos os canvas (mouse e toque)
+const addDrawingListeners = (element, context) => {
+    element.addEventListener('mousedown', (e) => startDrawing(e, context));
+    element.addEventListener('mouseup', stopDrawing);
+    element.addEventListener('mousemove', (e) => draw(e, context));
+    element.addEventListener('mouseout', stopDrawing);
+
+    element.addEventListener('touchstart', (e) => startDrawing(e, context));
+    element.addEventListener('touchend', stopDrawing);
+    element.addEventListener('touchmove', (e) => draw(e, context));
+    element.addEventListener('touchcancel', stopDrawing);
+};
+
+addDrawingListeners(canvas, ctx);
+addDrawingListeners(modalCanvas, modalCtx);
+
+function getCoordinates(e, canvasElement) {
+    const rect = canvasElement.getBoundingClientRect();
+    const scaleX = canvasElement.width / rect.width;
+    const scaleY = canvasElement.height / rect.height;
 
     let clientX, clientY;
 
-    // Verifica se é um evento de toque ou mouse
     if (e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
@@ -53,40 +73,97 @@ function getCoordinates(e) {
     };
 }
 
-function startDrawing(e) {
-    e.preventDefault(); // Previne o scroll da página em mobile ao desenhar
+function startDrawing(e, context) {
+    e.preventDefault();
     drawing = true;
-    ctx.beginPath();
-    const coords = getCoordinates(e);
-    ctx.moveTo(coords.x, coords.y);
+    currentCtx = context; // Define qual contexto está ativo
+    currentCtx.beginPath();
+    const coords = getCoordinates(e, currentCtx.canvas); // Passa o elemento canvas correto
+    currentCtx.moveTo(coords.x, coords.y);
 }
 
 function stopDrawing() {
     drawing = false;
-    saveSignature(); // Salva a assinatura como Base64 quando o desenho para
+    // saveSignature() agora será chamado apenas quando o modal for salvo ou se o desenho parar no canvas principal
 }
 
-function draw(e) {
+function draw(e, context) {
     if (!drawing) return;
-    e.preventDefault(); // Previne o scroll da página em mobile ao desenhar
-    const coords = getCoordinates(e);
-    ctx.lineTo(coords.x, coords.y);
-    ctx.stroke();
+    e.preventDefault();
+    if (currentCtx !== context) return; // Garante que estamos desenhando no contexto correto
+    const coords = getCoordinates(e, currentCtx.canvas);
+    currentCtx.lineTo(coords.x, coords.y);
+    currentCtx.stroke();
 }
 
 function limparAssinatura() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas visualmente
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas principal
+    modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height); // Limpa o canvas do modal
     document.getElementById('assinaturaBase64').value = ''; // Remove o dado Base64
 }
 
-function saveSignature() {
-    // Converte o conteúdo do canvas para uma URL de dados (imagem Base64)
-    const dataURL = canvas.toDataURL('image/png');
+function saveSignature(sourceCanvas = canvas) { // Recebe qual canvas é a fonte da assinatura
+    const dataURL = sourceCanvas.toDataURL('image/png');
     document.getElementById('assinaturaBase64').value = dataURL;
+
+    // Desenha a assinatura do canvas do modal de volta no canvas principal (se diferente)
+    if (sourceCanvas === modalCanvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o principal antes de desenhar
+        const img = new Image();
+        img.onload = () => {
+            // Calcula as novas dimensões para manter a proporção ao desenhar no canvas principal
+            const aspectRatio = SIGNATURE_CANVAS_WIDTH / SIGNATURE_CANVAS_HEIGHT;
+            let drawWidth = canvas.width;
+            let drawHeight = canvas.width / aspectRatio;
+
+            // Se a altura calculada for maior que a altura do canvas principal, ajusta
+            if (drawHeight > canvas.height) {
+                drawHeight = canvas.height;
+                drawWidth = canvas.height * aspectRatio;
+            }
+
+            // Centraliza a imagem desenhada no canvas principal
+            const drawX = (canvas.width - drawWidth) / 2;
+            const drawY = (canvas.height - drawHeight) / 2;
+
+            ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+        };
+        img.src = dataURL;
+    }
 }
 
-// O restante do seu código (window.onload, toggleFilhosFields, toggleEmpresaAtualField, formatDate, gerarPDF)
-// pode permanecer o mesmo, pois as alterações acima cobrem a funcionalidade da assinatura.
+// --- Funções para Gerenciar o Modal ---
+openSignatureModalBtn.addEventListener('click', () => {
+    signatureModal.style.display = 'flex'; // Exibe o modal
+    // Copia a assinatura existente do canvas principal para o canvas do modal
+    if (document.getElementById('assinaturaBase64').value) {
+        const img = new Image();
+        img.onload = () => {
+            modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+            modalCtx.drawImage(img, 0, 0, modalCanvas.width, modalCanvas.height);
+        };
+        img.src = document.getElementById('assinaturaBase64').value;
+    }
+    // Garante que o pincel esteja configurado para o modalCtx
+    setupCanvasContext(modalCtx);
+});
+
+closeSignatureModalBtn.addEventListener('click', () => {
+    signatureModal.style.display = 'none'; // Esconde o modal
+});
+
+saveModalSignatureBtn.addEventListener('click', () => {
+    saveSignature(modalCanvas); // Salva a assinatura do canvas do modal
+    signatureModal.style.display = 'none'; // Esconde o modal
+});
+
+clearModalSignatureBtn.addEventListener('click', () => {
+    modalCtx.clearRect(0, 0, modalCanvas.width, modalCanvas.height); // Limpa o canvas do modal
+});
+
+
+// O restante do seu código para inicialização da página e geração do PDF
+// permanece o mesmo, pois as alterações acima cobrem a funcionalidade da assinatura.
 
 // --- Lógica de Inicialização da Página e Campos Condicionais ---
 // `window.onload` garante que todo o HTML esteja carregado antes de executar o script.
