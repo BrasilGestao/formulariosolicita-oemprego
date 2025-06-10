@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Formulário de Solicitação de Emprego</title>
+    <link rel="stylesheet" href="style.css"/>
+    <style>
+        /* Seus estilos CSS, ou do seu arquivo style.css */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px; /* Aumentado para melhor visualização */
+            margin: 20px auto;
+        }
+        h1, h3 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+        }
+        label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="email"],
+        select,
+        textarea {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Garante que padding e border não aumentem a largura */
+        }
+        textarea {
+            resize: vertical; /* Permite redimensionar verticalmente */
+            min-height: 80px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .campo {
+            margin-bottom: 20px;
+        }
+        canvas {
+            background-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="formContainer">
+        <h1>Formulário de Solicitação de Emprego</h1>
+        <form id="jobForm">
+
+            <section>
+                <h3>Dados Pessoais</h3>
+                <label>Data:
+                    <input type="date" id="dataAtual" name="data" readonly>
+                </label>
+
+                <label>Cargo:
+                    <input type="text" id="cargo" name="cargo" value="Bombeiro Civil" readonly>
+                </label>
+
+                <label>Nome:
+                    <input type="text" id="nome" name="nome">
+                </label>
+
+                <label>CPF:
+                    <input type="text" id="cpf" name="cpf" maxlength="14" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" placeholder="000.000.000-00">
+                </label>
+
+                <label>RG:
+                    <input type="text" id="rg" name="rg">
+                </label>
+
+                <label>Data de Nascimento:
+                    <input type="date" id="nascimento" name="nascimento">
+                </label>
+
+                <label>Naturalidade:
+                    <input type="text" id="naturalidade" name="naturalidade">
+                </label>
+
+                <label>Nome do Pai:
+                    <input type="text" id="pai" name="pai">
+                </label>
+
+                <label>Nome da Mãe:
+                    <input type="text" id="mae" name="mae">
+                </label>
+
+                <label>CNH:
+                    <select id="cnh" name="cnh">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Não tenho">Não tenho</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="AB">AB</option>
+                        <option value="AD">AD</option>
+                        <option value="AE">AE</option>
+                    </select>
+                </label>
+
+                <label>Vencimento CNH:
+                    <input type="date" id="venc_cnh" name="venc_cnh">
+                </label>
+
+                <label>PIS/PASEP:
+                    <input type="text" id="pis" name="pis">
+                </label>
+
+                <label>Carteira de trabalho:
+                    <input type="text" id="cartiera" name="carteira">
+                </label>
+
+                <label>Endereço:
+                    <input type="text" id="endereco" name="endereco">
+                </label>
+
+                <label>Bairro:
+                    <input type="text" id="bairro" name="bairro">
+                </label>
+
+                <label>Cidade:
+                    <input type="text" id="cidade" name="cidade">
+                </label>
+
+                <label>Estado:
+                    <input type="text" id="estado" name="estado">
+                </label>
+
+                <label>CEP:
+                    <input type="text" id="cep" name="cep">
+                </label>
+
+                <label>Telefone Residencial:
+                    <input type="text" id="tel_res" name="tel_res">
+                </label>
+
+                <label>Celular:
+                    <input type="text" id="celular" name="celular">
+                </label>
+
+                <label>E-mail:
+                    <input type="email" id="email" name="email">
+                </label>
+
+                <label>Possui filhos?
+                    <select id="temFilhos" name="filhos">
+                        <option value="">Selecione uma opção</option>
+                        <option value="nao">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </label>
+
+                <label id="labelQtdFilhos" style="display:none;">Quantos:
+                    <select id="qtd_filhos" name="qtd_filhos">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Não tenho">Não tenho</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </label>
+
+                <label id="labelIdadeFilhos" style="display:none;">Idade dos filhos:
+                    <input type="text" id="idadefilhos" name="idadefilhos">
+                </label>
+
+                <label>Estado Civil:
+                    <select id="estado_civil" name="estado_civil">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Casado">Casado</option>
+                        <option value="Solteiro">Solteiro</option>
+                        <option value="Divorciado">Divorciado</option>
+                        <option value="Separado">Separado</option>
+                    </select>
+                </label>
+
+                <label>Possui imóvel próprio?
+                    <select id="imovel" name="imovel">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </label>
+
+                <label>Está recebendo seguro desemprego?
+                    <select id="seguro" name="seguro">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                </label>
+            </section>
+
+            <section>
+                <h3>Uniforme</h3>
+                <label>Calça:
+                    <select id="calca" name="calca">
+                        <option value="">Selecione uma opção</option>
+                        <option value="P">P</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option><option value="GG3">GG3</option>
+                    </select>
+                </label>
+
+                <label>Camisa:
+                    <select id="camisa" name="camisa">
+                        <option value="">Selecione uma opção</option>
+                        <option value="P">P</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option><option value="GG3">GG3</option>
+                    </select>
+                </label>
+
+                <label>Gandola:
+                    <select id="gandola" name="gandola">
+                        <option value="">Selecione uma opção</option>
+                        <option value="P">P</option><option value="M">M</option><option value="G">G</option><option value="GG">GG</option><option value="GG3">GG3</option>
+                    </select>
+                </label>
+
+                <label>Botina:
+                    <select id="botina" name="botina">
+                        <option value="">Selecione uma opção</option>
+                        <option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option>
+                        <option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option>
+                        <option value="43">43</option><option value="44">44</option><option value="45">45</option>
+                    </select>
+                </label>
+            </section>
+
+            <section>
+                <h3>Último Emprego</h3>
+                <label>Empresa:
+                    <input type="text" id="ultima_empresa" name="ultima_empresa">
+                </label>
+
+                <label>Cidade:
+                    <input type="text" id="cidade_empresa" name="cidade_empresa">
+                </label>
+
+                <label>Estado:
+                    <input type="text" id="estado_empresa" name="estado_empresa">
+                </label>
+
+                <label>Função ou Cargo:
+                    <input type="text" id="cargo_empresa" name="cargo_empresa">
+                </label>
+
+                <label>Data de Admissão:
+                    <input type="date" id="admissao" name="admissao">
+                </label>
+
+                <label>Data de Demissão:
+                    <input type="date" id="demissao" name="demissao">
+                </label>
+
+                <label>Está trabalhando?
+                    <select id="estaTrabalhando" name="trabalhando">
+                        <option value="">Selecione uma opção</option>
+                        <option value="nao">Não</option>
+                        <option value="sim">Sim</option>
+                    </select>
+                </label>
+
+                <div id="empresaAtual" style="display:none;">
+                    <label>Qual empresa:
+                        <input type="text" id="empresa_atual" name="empresa_atual">
+                    </label>
+                </div>
+            </section>
+
+            <section>
+                <h3>Escolaridade</h3>
+                <label>Ensino Fundamental:
+                    <select id="fundamental" name="fundamental">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Completo">Completo</option><option value="Incompleto">Incompleto</option>
+                    </select>
+                </label>
+
+                <label>Ensino Médio:
+                    <select id="medio" name="medio">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Completo">Completo</option><option value="Incompleto">Incompleto</option>
+                    </select>
+                </label>
+
+                <label>Ensino Técnico:
+                    <select id="tecnico" name="tecnico">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Completo">Completo</option><option value="Incompleto">Incompleto</option><option value="Naopossuo">Não possuo</option>
+                    </select>
+                </label>
+
+                <label>Ensino Superior:
+                    <select id="superior" name="superior">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Completo">Completo</option><option value="Incompleto">Incompleto</option><option value="Naopossuo">Não possuo</option>
+                    </select>
+                </label>
+
+                <label>Curso Profissionalizante ou Técnico:
+                    <input type="text" id="curso_profi" name="curso_profi">
+                </label>
+
+                <label>Possui NT07 do curso BPC?
+                    <select id="nt07" name="nt07">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Sim">Sim</option><option value="Não">Não</option>
+                    </select>
+                </label>
+            </section>
+
+            <section>
+                <h3>Questionário</h3>
+                <label>Você tem objetivos pessoais e profissionais? Quais?
+                    <textarea id="objetivos" name="objetivos"></textarea>
+                </label>
+
+                <label>Quais experiências profissionais te deram maior satisfação e por quê?
+                    <textarea id="experiencias" name="experiencias"></textarea>
+                </label>
+
+                <label>Cite suas qualidades e pontos fracos:
+                    <textarea id="qualidades" name="qualidades"></textarea>
+                </label>
+
+                <label>Como era sua relação com seu último superior?
+                    <select id="relacao_superior" name="relacao_superior">
+                        <option value="">Selecione uma opção</option>
+                        <option value="Ótima">Ótima</option><option value="Boa">Boa</option><option value="Regular">Regular</option><option value="Ruim">Ruim</option>
+                    </select>
+                </label>
+
+                <label>Quais características você julga importante para este cargo?
+                    <textarea id="caracteristicas" name="caracteristicas"></textarea>
+                </label>
+
+                <label>Qual sua visão sobre pedir demissão? Quando deve ser feito?
+                    <textarea id="demissao_visao" name="demissao_visao"></textarea>
+                </label>
+
+                <label>O que te motiva a trabalhar melhor?
+                    <textarea id="motivacao" name="motivacao"></textarea>
+                </label>
+
+                <label>O que você pensa sobre trabalhar em dois empregos?
+                    <textarea id="dois_empregos" name="dois_empregos"></textarea>
+                </label>
+
+                <label>Por que devemos contratá-lo(a)? Como contribuirá com a empresa?
+                    <textarea id="porque_contratar" name="porque_contratar"></textarea>
+                </label>
+            </section>
+
+            <section>
+                <h3>Quem Sou Eu</h3>
+                <label>Quem sou eu?
+                    <textarea id="quem_sou_eu" name="quem_sou_eu"></textarea>
+                </label>
+
+                <div class="campo" style="text-align: center;">
+                    <label for="signatureCanvas">Assinatura do Candidato:</label><br>
+                    <canvas id="signatureCanvas" width="400" height="150" style="border:1px solid #ccc; border-radius: 8px;"></canvas><br>
+                    <button type="button" onclick="limparAssinatura()">Limpar</button>
+                </div>
+                <input type="hidden" id="assinaturaBase64" name="assinatura"/>
+            </section>
+
+            <div style="text-align: center; margin-top: 20px;">
+    <button type="button" id="gerarPdfButton">Gerar PDF</button> </div>
+        </form>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="script.js"></script>    
+</body>
+</html>
