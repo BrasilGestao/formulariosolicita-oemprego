@@ -19,19 +19,46 @@ ctx.lineCap = 'round'; // Pontas arredondadas
 ctx.strokeStyle = '#000'; // Cor preta (preto sólido para a assinatura)
 
 // Event Listeners para desenhar no canvas
+// Eventos de Mouse (para desktop)
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseout', stopDrawing); // Para de desenhar se o mouse sair do canvas
 
-function startDrawing(e) {
-    drawing = true;
-    ctx.beginPath();
-    // Ajusta a posição para a densidade de pixels do canvas de alta resolução
+// Eventos de Toque (para mobile)
+canvas.addEventListener('touchstart', startDrawing);
+canvas.addEventListener('touchend', stopDrawing);
+canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchcancel', stopDrawing); // Para de desenhar se o toque for cancelado
+
+function getCoordinates(e) {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    ctx.moveTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
+
+    let clientX, clientY;
+
+    // Verifica se é um evento de toque ou mouse
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+
+    return {
+        x: (clientX - rect.left) * scaleX,
+        y: (clientY - rect.top) * scaleY
+    };
+}
+
+function startDrawing(e) {
+    e.preventDefault(); // Previne o scroll da página em mobile ao desenhar
+    drawing = true;
+    ctx.beginPath();
+    const coords = getCoordinates(e);
+    ctx.moveTo(coords.x, coords.y);
 }
 
 function stopDrawing() {
@@ -41,10 +68,9 @@ function stopDrawing() {
 
 function draw(e) {
     if (!drawing) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    ctx.lineTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
+    e.preventDefault(); // Previne o scroll da página em mobile ao desenhar
+    const coords = getCoordinates(e);
+    ctx.lineTo(coords.x, coords.y);
     ctx.stroke();
 }
 
@@ -59,15 +85,18 @@ function saveSignature() {
     document.getElementById('assinaturaBase64').value = dataURL;
 }
 
+// O restante do seu código (window.onload, toggleFilhosFields, toggleEmpresaAtualField, formatDate, gerarPDF)
+// pode permanecer o mesmo, pois as alterações acima cobrem a funcionalidade da assinatura.
+
 // --- Lógica de Inicialização da Página e Campos Condicionais ---
 // `window.onload` garante que todo o HTML esteja carregado antes de executar o script.
 window.onload = function() {
     // Preenche a data atual no campo correspondente
     const today = new Date();
-    const year = today.getFullYear(); 
+    const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0'); // Mês é 0-indexed, adiciona 1 e formata para 2 dígitos
     const day = String(today.getDate()).padStart(2, '0'); // Formata o dia para 2 dígitos
-    document.getElementById('dataAtual').value = `${year}-${month}-${day}`; 
+    document.getElementById('dataAtual').value = `${year}-${month}-${day}`;
 
     // Inicializa a visibilidade dos campos condicionais ao carregar a página
     toggleFilhosFields();
@@ -127,7 +156,7 @@ function toggleEmpresaAtualField() {
 // Converte a data de YYYY-MM-DD para DD/MM/YYYY
 const formatDate = (dateString) => {
     // Retorna "Não informado" para strings vazias ou já marcadas como tal
-    if (!dateString || dateString.trim() === '' || dateString === 'Não informado') return 'Não informado'; 
+    if (!dateString || dateString.trim() === '' || dateString === 'Não informado') return 'Não informado';
     try {
         const [year, month, day] = dateString.split('-');
         return `${day}/${month}/${year}`;
@@ -235,20 +264,20 @@ async function gerarPDF() {
         // --- Função para Adicionar um Campo Full-Width (Label: Value) ---
         const addFullWidthField = (label, value) => {
             yPos = checkPageBreak(yPos, lineHeightDefault * 2); // Garante espaço para label e pelo menos uma linha de valor
-            
+
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(11);
             doc.setTextColor(textColor[0], textColor[1], textColor[2]);
             doc.text(`${label}:`, margin, yPos);
-            
+
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
-            
+
             const valueX = margin + doc.getStringUnitWidth(`${label}: `) * (doc.getFontSize() / doc.internal.scaleFactor) + valueColOffset;
             const availableWidthForValue = contentWidth - (valueX - margin);
-            
+
             const splitValue = doc.splitTextToSize(value, availableWidthForValue);
-            
+
             if (splitValue.length > 1 || value.length > 50) { // Se o valor quebrar em várias linhas ou for longo
                 doc.text(splitValue, valueX, yPos);
                 yPos += splitValue.length * lineHeightSmall + 2; // Ajusta yPos para as linhas do valor
@@ -272,7 +301,7 @@ async function gerarPDF() {
             const label1Text = `${field1.label}: `;
             const label1Width = doc.getStringUnitWidth(label1Text) * doc.getFontSize() / doc.internal.scaleFactor;
             doc.text(label1Text, margin, yPos);
-            
+
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             const value1X = margin + label1Width + valueColOffset;
@@ -288,7 +317,7 @@ async function gerarPDF() {
             const label2Width = doc.getStringUnitWidth(label2Text) * doc.getFontSize() / doc.internal.scaleFactor;
             const col2StartX = margin + halfWidth + fieldPadding; // Início da segunda coluna
             doc.text(label2Text, col2StartX, yPos);
-            
+
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(10);
             const value2X = col2StartX + label2Width + valueColOffset;
@@ -306,15 +335,15 @@ async function gerarPDF() {
         // --- Função para Adicionar Perguntas e Respostas do Questionário ---
         const addQuestionSection = (question, answer) => {
             yPos = checkPageBreak(yPos, 40); // Garante espaço para a pergunta e resposta
-            
+
             // Desenha a linha lateral azul
             doc.setDrawColor(0, 123, 255); // Cor azul
             doc.setLineWidth(1.5); // Largura da linha
             const lineStartX = margin;
-            const lineEndY = yPos + (doc.splitTextToSize(question, contentWidth - 8).length * lineHeightSmall) + 
-                             (doc.splitTextToSize(answer, contentWidth - 8).length * lineHeightSmall) + 10; // Estima o fim da linha
-            doc.line(lineStartX, yPos - 2, lineStartX, lineEndY); 
-            
+            const lineEndY = yPos + (doc.splitTextToSize(question, contentWidth - 8).length * lineHeightSmall) +
+                                 (doc.splitTextToSize(answer, contentWidth - 8).length * lineHeightSmall) + 10; // Estima o fim da linha
+            doc.line(lineStartX, yPos - 2, lineStartX, lineEndY);
+
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(11);
             doc.setTextColor(titleColor[0], titleColor[1], titleColor[2]); // Azul para a pergunta
@@ -352,7 +381,7 @@ async function gerarPDF() {
         addDualFields({ label: "Estado", value: data.estado }, { label: "CEP", value: data.cep });
         addDualFields({ label: "Telefone Residencial", value: data.tel_res }, { label: "Celular", value: data.celular });
         addFullWidthField("E-mail", data.email);
-        
+
         // Campos condicionais para filhos
         if (data.filhos === 'Sim') { // Comparar com 'Sim' pois estamos pegando o TEXTO do SELECT
             addDualFields({ label: "Possui filhos?", value: data.filhos }, { label: "Quantos filhos", value: data.qtd_filhos });
@@ -377,7 +406,7 @@ async function gerarPDF() {
         addDualFields({ label: "Cidade", value: data.cidade_empresa }, { label: "Estado", value: data.estado_empresa });
         addFullWidthField("Função ou Cargo", data.cargo_empresa);
         addDualFields({ label: "Data de Admissão", value: formatDate(data.admissao) }, { label: "Data de Demissão", value: formatDate(data.demissao) });
-        
+
         // Campo condicional para está trabalhando
         if (data.trabalhando === 'Sim') { // Comparar com 'Sim' pois estamos pegando o TEXTO do SELECT
             addDualFields({ label: "Está trabalhando?", value: data.trabalhando }, { label: "Qual empresa", value: data.empresa_atual });
@@ -395,7 +424,7 @@ async function gerarPDF() {
 
         // --- Questionário ---
         addSectionTitle("Questionário");
-        
+
         addQuestionSection("Você tem objetivos pessoais e profissionais? Quais?", data.objetivos);
         addQuestionSection("Quais experiências profissionais te deram maior satisfação e por quê?", data.experiencias);
         addQuestionSection("Cite suas qualidades e pontos fracos:", data.qualidades);
@@ -423,7 +452,7 @@ async function gerarPDF() {
         if (signatureImgData) {
             const imgWidthPdf = 80; // Largura da imagem da assinatura no PDF (em mm)
             const imgHeightPdf = (SIGNATURE_CANVAS_HEIGHT * imgWidthPdf) / SIGNATURE_CANVAS_WIDTH; // Calcula altura para manter proporção
-            
+
             // Centraliza a imagem da assinatura
             const imgX = (doc.internal.pageSize.width / 2) - (imgWidthPdf / 2);
             doc.addImage(signatureImgData, 'PNG', imgX, yPos, imgWidthPdf, imgHeightPdf);
