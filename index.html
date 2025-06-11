@@ -421,6 +421,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
-    <script src="script.js"></script>    
+    <script src="script.js"></script>
+    <script>
+  // Se não houver login prévio, redireciona para login
+  if (document.referrer.indexOf('login.html') === -1) {
+    window.location.href = 'login.html';
+  }
+</script>
 </body>
 </html>

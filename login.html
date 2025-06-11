@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Brasil Gestão</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0a2647, #205295);
+    }
+
+    .login-container {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 400px;
+      transition: transform 0.3s ease;
+    }
+
+    .login-container:hover {
+      transform: scale(1.02);
+    }
+
+    .login-container h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #0a2647;
+      font-weight: 600;
+      font-size: 24px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 14px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .login-container input:focus {
+      border-color: #205295;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 14px;
+      background: #144272;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .login-container button:hover {
+      background: #205295;
+      transform: scale(1.02);
+    }
+
+    .error {
+      color: red;
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Login Brasil Gestão</h2>
+    <input type="text" id="usuario" placeholder="Usuário" />
+    <input type="password" id="senha" placeholder="Senha" />
+    <button onclick="fazerLogin()">Entrar</button>
+    <div id="mensagemErro" class="error"></div>
+  </div>
+
+  <script>
+    function fazerLogin() {
+      const usuario = document.getElementById('usuario').value.trim();
+      const senha = document.getElementById('senha').value;
+
+      if (usuario === 'guilherme' && senha === 'BrasilGestao') {
+        window.location.href = 'index.html';
+      } else {
+        document.getElementById('mensagemErro').textContent = 'Usuário ou senha incorretos!';
+      }
+    }
+  </script>
+</body>
+</html>
