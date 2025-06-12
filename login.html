@@ -95,16 +95,33 @@
   </div>
 
   <script>
-    function fazerLogin() {
-      const usuario = document.getElementById('usuario').value.trim();
-      const senha = document.getElementById('senha').value;
+  function fazerLogin() {
+    const usuario = document.getElementById('usuario').value.trim();
+    const senha = document.getElementById('senha').value;
 
-      if (usuario === 'guilherme' && senha === 'brasilgestao') {
-        window.location.href = 'index.html';
-      } else {
-        document.getElementById('mensagemErro').textContent = 'Usuário ou senha incorretos!';
-      }
+    // Lista de usuários e senhas válidos
+    const loginsValidos = [
+      { usuario: 'candidato1001', senha: 'brasilgestao' },
+      { usuario: 'candidato1002', senha: 'brasilgestao' },
+      { usuario: 'candidato1003', senha: 'brasilgestao' },
+      { usuario: 'candidato1004', senha: 'brasilgestao' },
+      { usuario: 'candidato1005', senha: 'brasilgestao' },
+      { usuario: 'candidato1006', senha: 'brasilgestao' },
+      { usuario: 'candidato1007', senha: 'brasilgestao' }
+    ];
+
+    // Verifica se existe um par usuário/senha válido
+    const loginValido = loginsValidos.find(
+      login => login.usuario === usuario && login.senha === senha
+    );
+
+    if (loginValido) {
+      window.location.href = 'index.html'; // Redireciona se estiver certo
+    } else {
+      document.getElementById('mensagemErro').textContent = 'Usuário ou senha incorretos!';
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
