@@ -301,6 +301,22 @@
             </section>
 
             <section>
+            <label for="disponibilidadeDeslocamento">
+    Você possui disponibilidade para se deslocar e atuar em nossas unidades de Vila Velha, Serra e Cariacica?
+</label>
+<select id="disponibilidadeDeslocamento" name="disponibilidade_deslocamento" required>
+    <option value="">Selecione uma opção</option>
+    <option value="sim">Sim</option>
+    <option value="nao">Não</option>
+</select>
+
+<div id="containerJustificativa" style="display: none;">
+    <label for="motivoIndisponibilidade">Por qual motivo você não teria disponibilidade?</label>
+    <textarea id="motivoIndisponibilidade" name="motivo_indisponibilidade" placeholder="Ex: Tenho disponibilidade apenas para Vila Velha, dificuldade com transporte, etc."></textarea>
+</div>
+        </section>
+
+            <section>
                 <h3>Escolaridade</h3>
                 <label>Ensino Fundamental:
                     <select id="fundamental" name="fundamental">
