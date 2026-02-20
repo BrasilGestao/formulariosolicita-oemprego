@@ -155,22 +155,24 @@ clearModalSignatureBtn.addEventListener('click', () => {
 });
 
 // --- Lógica de Inicialização da Página e Campos Condicionais ---
-window.onload = function() {
+window.onload = function () {
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     document.getElementById('dataAtual').value = `${year}-${month}-${day}`;
 
-    // Inicializa a visibilidade dos campos condicionais
+    // Inicializa visibilidade
     toggleFilhosFields();
     toggleEmpresaAtualField();
-    toggleDisponibilidadeField(); // NOVO: Inicializa o novo campo
+    toggleDisponibilidadeField();
+    toggleDisponibilidadeHorarioField();
 
-    // Adiciona event listeners para alterar a visibilidade
+    // Event listeners
     document.getElementById('temFilhos').addEventListener('change', toggleFilhosFields);
     document.getElementById('estaTrabalhando').addEventListener('change', toggleEmpresaAtualField);
-    document.getElementById('disponibilidadeDeslocamento').addEventListener('change', toggleDisponibilidadeField); // NOVO: Adiciona listener
+    document.getElementById('disponibilidadeDeslocamento').addEventListener('change', toggleDisponibilidadeField);
+    document.getElementById('disponibilidadeHorario').addEventListener('change', toggleDisponibilidadeHorarioField);
 
     const gerarPdfButton = document.getElementById('gerarPdfButton');
     if (gerarPdfButton) {
@@ -178,6 +180,7 @@ window.onload = function() {
     }
 };
 
+// ---------------- FILHOS ----------------
 function toggleFilhosFields() {
     const temFilhos = document.getElementById('temFilhos').value;
     const qtdFilhosLabel = document.getElementById('labelQtdFilhos');
@@ -200,6 +203,7 @@ function toggleFilhosFields() {
     }
 }
 
+// ---------------- EMPRESA ATUAL ----------------
 function toggleEmpresaAtualField() {
     const estaTrabalhando = document.getElementById('estaTrabalhando').value;
     const empresaAtualDiv = document.getElementById('empresaAtual');
@@ -215,7 +219,7 @@ function toggleEmpresaAtualField() {
     }
 }
 
-// NOVO: Função para controlar a visibilidade do campo de justificativa de deslocamento
+// ---------------- DISPONIBILIDADE DESLOCAMENTO ----------------
 function toggleDisponibilidadeField() {
     const disponibilidade = document.getElementById('disponibilidadeDeslocamento').value;
     const justificativaContainer = document.getElementById('containerJustificativa');
@@ -227,7 +231,23 @@ function toggleDisponibilidadeField() {
     } else {
         justificativaContainer.style.display = 'none';
         justificativaInput.removeAttribute('required');
-        justificativaInput.value = ''; // Limpa o valor se o campo for ocultado
+        justificativaInput.value = '';
+    }
+}
+
+// ---------------- DISPONIBILIDADE HORÁRIO ----------------
+function toggleDisponibilidadeHorarioField() {
+    const disponibilidade = document.getElementById('disponibilidadeHorario').value;
+    const justificativaContainer = document.getElementById('containerJustificativaHorario');
+    const justificativaInput = document.getElementById('motivoIndisponibilidadeHorario');
+
+    if (disponibilidade === 'nao') {
+        justificativaContainer.style.display = 'block';
+        justificativaInput.setAttribute('required', 'required');
+    } else {
+        justificativaContainer.style.display = 'none';
+        justificativaInput.removeAttribute('required');
+        justificativaInput.value = '';
     }
 }
 
@@ -459,12 +479,30 @@ async function gerarPDF() {
         }
 
         // NOVO: Adicionando a seção de disponibilidade ao PDF
-        addSectionTitle("Disponibilidade");
-        addQuestionSection("Disponibilidade para deslocamento (Vila Velha, Serra, Cariacica)?", data.disponibilidade_deslocamento);
-        // Se a resposta for "Não", adiciona a justificativa
-        if (data.disponibilidade_deslocamento === 'Não') {
-            addQuestionSection("Motivo da indisponibilidade:", data.motivo_indisponibilidade);
-        }
+addSectionTitle("Disponibilidade");
+addQuestionSection(
+    "Disponibilidade para deslocamento (Vila Velha, Serra, Cariacica)?",
+    data.disponibilidade_deslocamento
+);
+
+// Se a resposta for "Não", adiciona a justificativa
+if (data.disponibilidade_deslocamento === 'Não') {
+    addQuestionSection("Motivo da indisponibilidade:", data.motivo_indisponibilidade);
+}
+
+// NOVO: Disponibilidade de horário (diurno e noturno)
+addQuestionSection(
+    "Disponibilidade para trabalhar em horário diurno e noturno?",
+    data.disponibilidade_horario
+);
+
+// Se a resposta for "Não", adiciona a justificativa
+if (data.disponibilidade_horario === 'Não') {
+    addQuestionSection(
+        "Motivo da indisponibilidade de horário:",
+        data.motivo_indisponibilidade_horario
+    );
+}
 
         addSectionTitle("Escolaridade");
         addDualFields({ label: "Ensino Fundamental", value: data.fundamental }, { label: "Ensino Médio", value: data.medio });
